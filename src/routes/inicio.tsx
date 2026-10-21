@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogOut, Plus, Sparkles } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -39,12 +39,12 @@ function Home() {
         <div className="flex items-center justify-between px-6 py-3 md:px-10">
           <Logo light />
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setOpen(true)}
+            <Link
+              to="/automacoes"
               className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-md transition hover:-translate-y-0.5 hover:brightness-105"
             >
               <Plus className="h-4 w-4" /> Nova Iniciativa
-            </button>
+            </Link>
             <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground sm:flex" title={user.email}>
               {user.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
             </div>
