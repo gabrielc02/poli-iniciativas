@@ -144,7 +144,7 @@ function WhatsApp() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState<number | null>(null);
   const copy = async (i: number) => {
-    try { await navigator.clipboard.writeText(templates[i].text); } catch { /* ignore */ }
+    try { await navigator.clipboard.writeText(templates[i]?.text ?? ""); } catch { /* ignore */ }
     setCopied(i); toast.success("Template copiado! Cole no grupo da sua engenharia.");
     setTimeout(() => setCopied(null), 2000);
   };
