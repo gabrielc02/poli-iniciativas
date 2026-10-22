@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
+import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as InicioRouteImport } from './routes/inicio'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
   path: '/automacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContatosRoute = ContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InicioRoute = InicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
@@ -32,30 +38,34 @@ const InicioRoute = InicioRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
+  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
+  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
+  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/automacoes' | '/inicio'
+  fullPaths: '/' | '/automacoes' | '/contatos' | '/inicio'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/automacoes' | '/inicio'
-  id: '__root__' | '/' | '/automacoes' | '/inicio'
+  to: '/' | '/automacoes' | '/contatos' | '/inicio'
+  id: '__root__' | '/' | '/automacoes' | '/contatos' | '/inicio'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutomacoesRoute: typeof AutomacoesRoute
+  ContatosRoute: typeof ContatosRoute
   InicioRoute: typeof InicioRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contatos': {
+      id: '/contatos'
+      path: '/contatos'
+      fullPath: '/contatos'
+      preLoaderRoute: typeof ContatosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inicio': {
       id: '/inicio'
       path: '/inicio'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutomacoesRoute: AutomacoesRoute,
+  ContatosRoute: ContatosRoute,
   InicioRoute: InicioRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Sparkles } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { Sparkles } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteHero } from "@/components/SiteHero";
 import { InitiativeRow } from "@/components/InitiativeRow";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getUser, ongoing, past, setUser, type User } from "@/lib/initiatives";
@@ -31,37 +32,26 @@ function Home() {
 
   if (!user) return null;
 
-  const logout = () => { setUser(null); navigate({ to: "/", replace: true }); };
+  const logout = () => {
+    setUser(null);
+    navigate({ to: "/", replace: true });
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 bg-primary shadow-md">
-        <div className="flex items-center justify-between px-6 py-3 md:px-10">
-          <Logo light />
-          <div className="flex items-center gap-3">
-            <Link
-              to="/automacoes"
-              className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-md transition hover:-translate-y-0.5 hover:brightness-105"
-            >
-              <Plus className="h-4 w-4" /> Nova Iniciativa
-            </Link>
-            <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground sm:flex" title={user.email}>
-              {user.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
-            </div>
-            <button onClick={logout} aria-label="Sair" className="rounded-md p-2 text-primary-foreground/70 transition hover:bg-primary-foreground/10 hover:text-primary-foreground">
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white">
+      <SiteHeader user={user} onLogout={logout} />
 
-      <section className="bg-hero px-6 pb-10 pt-8 text-primary-foreground md:px-10">
-        <p className="text-sm opacity-70">Olá, {user.name.split(" ")[0]} 👋</p>
-        <h1 className="mt-1 text-3xl font-bold md:text-4xl">Iniciativas do Grêmio</h1>
-        <p className="mt-2 max-w-xl opacity-75">{ongoing.length} iniciativas em andamento · {past.length} concluídas</p>
-      </section>
+      <SiteHero
+        title="Grêmio Politécnico da USP"
+        subtitle={`Olá, ${user.name.split(" ")[0]} — iniciativas que movem a Poli`}
+      >
+        <p>
+          {ongoing.length} iniciativas em andamento · {past.length} concluídas. Acompanhe o catálogo e
+          proponha novas ideias pelo botão Nova Iniciativa.
+        </p>
+      </SiteHero>
 
-      <main className="space-y-10 py-8">
+      <main className="space-y-10 bg-white pb-12 pt-2">
         <InitiativeRow title="Iniciativas em Andamento" items={ongoing} />
         <InitiativeRow title="Iniciativas Passadas" items={past} />
       </main>
@@ -69,13 +59,18 @@ function Home() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 text-accent">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#0B2545]/10 text-[#0B2545]">
               <Sparkles className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-primary">Em breve: Ingestão de Propostas</DialogTitle>
-            <DialogDescription>Logo você poderá enviar novas iniciativas diretamente pela plataforma.</DialogDescription>
+            <DialogTitle className="text-[#0B2545]">Em breve: Ingestão de Propostas</DialogTitle>
+            <DialogDescription>
+              Logo você poderá enviar novas iniciativas diretamente pela plataforma.
+            </DialogDescription>
           </DialogHeader>
-          <button onClick={() => setOpen(false)} className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-secondary">
+          <button
+            onClick={() => setOpen(false)}
+            className="mt-2 rounded-md bg-[#0B2545] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1a4a7a]"
+          >
             Entendi
           </button>
         </DialogContent>

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import gremioInvertido from "@/assets/gremio_invertido.avif";
 import { getUser, setUser } from "@/lib/initiatives";
 
 export const Route = createFileRoute("/")({
@@ -30,7 +31,9 @@ function GoogleIcon() {
 function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  useEffect(() => { if (getUser()) navigate({ to: "/inicio", replace: true }); }, [navigate]);
+  useEffect(() => {
+    if (getUser()) navigate({ to: "/inicio", replace: true });
+  }, [navigate]);
 
   const signIn = () => {
     setLoading(true);
@@ -42,31 +45,46 @@ function Login() {
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-hero p-12 lg:flex">
-        <Logo light />
-        <div className="text-primary-foreground">
-          <h1 className="text-4xl font-bold leading-tight">Ideias que movem<br />a Poli.</h1>
-          <p className="mt-4 max-w-md opacity-75">Acompanhe, proponha e celebre as iniciativas do Grêmio Politécnico em um só lugar.</p>
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-gremio-hero p-12 lg:flex">
+        <Logo light link={false} />
+        <div className="relative z-10 max-w-lg text-white">
+          <h1 className="font-display text-4xl font-bold uppercase leading-tight tracking-wide xl:text-5xl">
+            Grêmio Politécnico da USP
+          </h1>
+          <p className="mt-3 text-lg text-white/85">Desde 1903 representando os alunos da Poli</p>
+          <p className="mt-5 text-sm leading-relaxed text-white/75">
+            Acompanhe, proponha e celebre as iniciativas do Grêmio em um só lugar.
+          </p>
         </div>
-        <p className="text-xs text-primary-foreground/50">© 2026 Grêmio Politécnico da USP</p>
-        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
+        <p className="relative z-10 text-xs text-white/50">© 2026 Grêmio Politécnico da USP</p>
+        <img
+          src={gremioInvertido}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -right-10 bottom-8 h-72 w-72 object-contain opacity-80 xl:h-96 xl:w-96"
+        />
       </div>
-      <div className="flex items-center justify-center p-6">
+
+      <div className="flex items-center justify-center bg-white p-6">
         <div className="w-full max-w-sm space-y-8">
-          <div className="lg:hidden"><Logo /></div>
+          <div className="lg:hidden">
+            <Logo link={false} />
+          </div>
           <div>
-            <h2 className="text-3xl font-bold text-primary">Bem-vindo(a)</h2>
-            <p className="mt-2 text-muted-foreground">Entre com sua conta USP do Google para continuar.</p>
+            <h2 className="font-display text-3xl font-bold uppercase tracking-wide text-[#0B2545]">
+              Bem-vindo(a)
+            </h2>
+            <p className="mt-2 text-[#0B2545]/70">Entre com sua conta USP do Google para continuar.</p>
           </div>
           <button
             onClick={signIn}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-border bg-card px-4 py-3 font-semibold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-70"
+            className="flex w-full items-center justify-center gap-3 rounded-md border border-[#0B2545] bg-white px-4 py-3 font-semibold text-[#0B2545] shadow-sm transition hover:bg-[#0B2545] hover:text-white disabled:opacity-70"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon />}
             {loading ? "Conectando..." : "Entrar com o Google"}
           </button>
-          <p className="text-center text-xs text-muted-foreground">Acesso restrito a e-mails @usp.br</p>
+          <p className="text-center text-xs text-[#0B2545]/55">Acesso restrito a e-mails @usp.br</p>
         </div>
       </div>
     </main>

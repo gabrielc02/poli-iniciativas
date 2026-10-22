@@ -39,7 +39,9 @@ export function InitiativeRow({ title, items }: { title: string; items: Initiati
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between px-6 md:px-10">
-        <h2 className="text-xl font-bold text-primary md:text-2xl">{title}</h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide text-[#0B2545] md:text-2xl">
+          {title}
+        </h2>
         <div className="flex gap-2">
           {[-1, 1].map((d) => (
             <button

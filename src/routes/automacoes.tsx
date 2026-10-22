@@ -1,13 +1,14 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Award, Send, MessageCircle, DoorOpen, Loader2, CheckCircle2, Copy, FileSpreadsheet, Zap, Download,
+  Award, Send, MessageCircle, DoorOpen, Loader2, CheckCircle2, Copy, FileSpreadsheet, Download, Zap,
 } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteHero } from "@/components/SiteHero";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getUser, type User } from "@/lib/initiatives";
+import { getUser, setUser, type User } from "@/lib/initiatives";
 
 export const Route = createFileRoute("/automacoes")({
   head: () => ({
@@ -226,28 +227,24 @@ function Automations() {
   const [user, setU] = useState<User | null>(null);
   useEffect(() => {
     const u = getUser();
-    if (!u) navigate({ to: "/", replace: true }); else setU(u);
+    if (!u) navigate({ to: "/", replace: true });
+    else setU(u);
   }, [navigate]);
   if (!user) return null;
 
+  const logout = () => {
+    setUser(null);
+    navigate({ to: "/", replace: true });
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 bg-primary shadow-md">
-        <div className="flex items-center justify-between px-6 py-3 md:px-10">
-          <Logo light />
-          <Link to="/inicio" className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 transition hover:bg-primary-foreground/10 hover:text-primary-foreground">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao catálogo
-          </Link>
-        </div>
-      </header>
-      <section className="bg-hero px-6 pb-10 pt-8 text-primary-foreground md:px-10">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">
-          <Zap className="h-3.5 w-3.5" /> Nova Iniciativa
-        </span>
-        <h1 className="mt-3 text-3xl font-bold md:text-4xl">Central de Automações Rápidas</h1>
-        <p className="mt-2 max-w-xl opacity-75">Tarefas repetitivas do Grêmio resolvidas em um clique.</p>
-      </section>
-      <main className="grid gap-6 px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-4">
+    <div className="min-h-screen bg-white">
+      <SiteHeader user={user} onLogout={logout} />
+      <SiteHero
+        title="Central de Automações"
+        subtitle="Nova iniciativa — tarefas repetitivas do Grêmio em um clique"
+      />
+      <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-4">
         <Certificates />
         <Sponsors />
         <WhatsApp />
