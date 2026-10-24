@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
-  Award, Send, MessageCircle, DoorOpen, Loader2, CheckCircle2, Copy, FileSpreadsheet, Download, Zap,
-  Users, ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText,
+  Award, Send, Loader2, CheckCircle2, FileSpreadsheet, Download,
+  ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText,
 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHero } from "@/components/SiteHero";
@@ -103,197 +103,6 @@ function Certificates() {
     </AutomationCard>
   );
 }
-
-/* 2. Patrocinadores */
-const sponsors = ["Itaú", "Embraer", "Natura", "Ambev", "Petrobras", "Nubank", "Vale", "Stone"];
-function Sponsors() {
-  const [state, setState] = useState<"idle" | "running" | "done">("idle");
-  const [sent, setSent] = useState(0);
-
-  const run = async () => {
-    setState("running"); setSent(0);
-    for (let i = 1; i <= sponsors.length; i++) { await sleep(350); setSent(i); }
-    setState("done");
-    toast.success("Automação executada com sucesso!", { description: `${sponsors.length} e-mails enviados com a apresentação institucional.` });
-  };
-
-  return (
-    <AutomationCard icon={<Send className="h-6 w-6" />} tag="Comercial" title="Disparador de Patrocinadores"
-      desc="Envie a apresentação institucional e mensagens padrão para a planilha de contatos de parceiros comerciais.">
-      {state !== "idle" && (
-        <div className="flex flex-wrap gap-1.5">
-          {sponsors.map((s, i) => (
-            <span key={s} className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition ${i < sent ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-              {i < sent ? <CheckCircle2 className="h-3 w-3" /> : <Loader2 className="h-3 w-3 animate-spin" />} {s}
-            </span>
-          ))}
-        </div>
-      )}
-      <button className={btnCta} disabled={state === "running"} onClick={run}>
-        {state === "running" ? <><Loader2 className="h-4 w-4 animate-spin" /> Enviando {sent}/{sponsors.length}...</>
-          : state === "done" ? <><CheckCircle2 className="h-4 w-4" /> Enviado · Disparar novamente</> : "Disparar E-mails"}
-      </button>
-    </AutomationCard>
-  );
-}
-
-/* 3. WhatsApp */
-const templates = [
-  { title: "Semana de Engenharia 2026", text: "🚀 *Semana de Engenharia 2026* chegou!\n\nPalestras, workshops e feira de empresas de 09 a 13/11 no Biênio.\n\n👉 Inscreva-se: https://gremiopoli.com/sde2026" },
-  { title: "InterPoli", text: "🏆 *InterPoli 2026* — chama a sua engenharia!\n\nInscrições de times abertas até 30/11.\n\n👉 https://gremiopoli.com/interpoli" },
-  { title: "Curso Poliglota", text: "🌎 *Curso Poliglota - Intensivo*\n\nInglês, espanhol e alemão com preço de estudante. Vagas limitadas!\n\n👉 https://gremiopoli.com/poliglota" },
-];
-function WhatsApp() {
-  const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState<number | null>(null);
-  const copy = async (i: number) => {
-    try { await navigator.clipboard.writeText(templates[i]?.text ?? ""); } catch { /* ignore */ }
-    setCopied(i); toast.success("Template copiado! Cole no grupo da sua engenharia.");
-    setTimeout(() => setCopied(null), 2000);
-  };
-  return (
-    <AutomationCard icon={<MessageCircle className="h-6 w-6" />} tag="Marketing" title="Booms de WhatsApp (Marketing)"
-      desc="Copie os templates de texto padrão e links de divulgação prontos para colar nos grupos de engenharia.">
-      <button className={btnCta} onClick={() => setOpen(true)}>Abrir Templates</button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-primary">Templates de divulgação</DialogTitle>
-            <DialogDescription>Clique em copiar e cole direto no WhatsApp.</DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[60vh] space-y-3 overflow-y-auto">
-            {templates.map((t, i) => (
-              <div key={t.title} className="rounded-lg border border-border bg-muted p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-bold text-primary">{t.title}</p>
-                  <button onClick={() => copy(i)} className={btnPrimary + " px-3 py-1 text-xs"}>
-                    {copied === i ? <><CheckCircle2 className="h-3.5 w-3.5" /> Copiado</> : <><Copy className="h-3.5 w-3.5" /> Copiar</>}
-                  </button>
-                </div>
-                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground">{t.text}</pre>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </AutomationCard>
-  );
-}
-
-/* 4. Inova */
-/* 4. Lista de Inscritos */
-/* 4. Lista de Contatos de Prospecção (Empresas) */
-/* 4. Lista de Participantes */
-function ContactList() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [participants, setParticipants] = useState<any[]>([]);
-
-  // Carrega a lista de participantes inscritos no projeto
-  const handleLoadParticipants = async () => {
-    setOpen(true);
-    setLoading(true);
-    
-    // Simula o delay de leitura da base de inscritos
-    await sleep(1200); 
-    
-    // Mock estruturado apenas com dados dos participantes do projeto
-    setParticipants([
-      { nome: "Gabriel Santos", curso: "Engenharia Elétrica", email: "gabriel.santos@usp.br", status: "Ativo" },
-      { nome: "Beatriz Oliveira", curso: "Engenharia Mecânica", email: "beatriz.oliveira@usp.br", status: "Pendente" },
-      { nome: "Lucas Rodrigues", curso: "Engenharia de Computação", email: "lucas.rodrigues@usp.br", status: "Ativo" },
-    ]);
-    
-    setLoading(false);
-    toast.success("Lista de participantes carregada!");
-  };
-
-  return (
-    <AutomationCard 
-      icon={<Users className="h-6 w-6" />} 
-      tag="Projeto" 
-      title="Lista de Participantes"
-      desc="Acesse o painel, visualize e gerencie todos os alunos inscritos e membros ativos integrados no projeto atual."
-    >
-      <button className={btnCta} onClick={handleLoadParticipants}>
-        Visualizar Participantes
-      </button>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Participantes Inscritos</DialogTitle>
-            <DialogDescription>
-              Visualização rápida dos membros e alunos vinculados ao projeto.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-4 min-h-[150px] flex flex-col justify-center">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-accent" />
-                <span className="text-sm text-muted-foreground animate-pulse">Carregando lista de participantes...</span>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="rounded-md border border-border overflow-hidden">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-muted border-b border-border font-bold text-muted-foreground">
-                        <th className="p-2.5">Nome</th>
-                        <th className="p-2.5">Curso / Habilitação</th>
-                        <th className="p-2.5">E-mail institucional</th>
-                        <th className="p-2.5">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {participants.map((p, i) => (
-                        <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
-                          <td className="p-2.5 font-semibold text-primary">{p.nome}</td>
-                          <td className="p-2.5 text-muted-foreground">{p.curso}</td>
-                          <td className="p-2.5 text-muted-foreground font-mono">{p.email}</td>
-                          <td className="p-2.5">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              p.status === 'Ativo' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-                            }`}>
-                              {p.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="flex gap-2">
-                  <button 
-                    className={btnPrimary + " flex-1"} 
-                    onClick={() => {
-                      setOpen(false);
-                      navigate({ to: "/participantes" });
-                    }}
-                  >
-                    Ir para Gerenciador Completo (/participantes)
-                  </button>
-                  <button 
-                    className="rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-muted" 
-                    onClick={() => setOpen(false)}
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </AutomationCard>
-  );
-}
-
-
-
 
 /* 5. Lista de Tarefas */
 type TaskStatus = "pendente" | "em andamento" | "espera" | "feito";
@@ -667,12 +476,9 @@ function Automations() {
         title="Central de Automações"
         subtitle="Nova iniciativa — tarefas repetitivas do Grêmio em um clique"
       />
-      <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-3">
-        <Certificates />
-        <Sponsors />
-        <WhatsApp />
-        <ContactList />
+      <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-4">
         <TaskList autor={user.name.split(" ")[0] ?? "Você"} />
+        <Certificates />
         <MessageTemplates />
         <RulesLink />
       </main>
