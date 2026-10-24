@@ -1,11 +1,15 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar, CheckCircle2 } from "lucide-react";
 import type { Initiative } from "@/lib/initiatives";
-
+import { Link } from "@tanstack/react-router"; 
 function Card({ item }: { item: Initiative }) {
   const done = item.status === "concluido";
+  
   return (
-    <article className="group relative aspect-[16/10] w-72 shrink-0 snap-start overflow-hidden rounded-xl bg-primary shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated sm:w-80">
+    <Link 
+      to="/automacoes" 
+      className="group relative aspect-[16/10] w-72 shrink-0 snap-start overflow-hidden rounded-xl bg-primary shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated sm:w-80 block"
+    >
       <img
         src={item.image}
         alt={item.name}
@@ -29,9 +33,10 @@ function Card({ item }: { item: Initiative }) {
           <Calendar className="h-3.5 w-3.5" /> {item.date}
         </p>
       </div>
-    </article>
+    </Link>
   );
 }
+
 
 export function InitiativeRow({ title, items }: { title: string; items: Initiative[] }) {
   const ref = useRef<HTMLDivElement>(null);

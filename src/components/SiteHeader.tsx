@@ -26,10 +26,10 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
             Iniciativas
           </Link>
           <Link to="/parceiros" className={cn(navLink, pathname === "/parceiros" && navActive)}>
-            parceiros
+            Parceiros
           </Link>
           <Link to="/membros" className={cn(navLink, pathname === "/membros" && navActive)}>
-            membros
+            Membros
           </Link>
         </nav>
 
@@ -53,7 +53,7 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
             membros
           </Link>
           <Link
-            to="/automacoes"
+            to="/inicio"
             className="inline-flex items-center gap-1.5 rounded-md border border-[#0B2545] bg-white px-3 py-1.5 text-sm font-semibold text-[#0B2545] transition hover:bg-[#0B2545] hover:text-white"
           >
             <Plus className="h-4 w-4" />
