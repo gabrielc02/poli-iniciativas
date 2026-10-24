@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
-import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as MembrosRouteImport } from './routes/membros'
+import { Route as MensagensRouteImport } from './routes/mensagens'
+import { Route as ParceirosRouteImport } from './routes/parceiros'
+import { Route as ParticipantesRouteImport } from './routes/participantes'
+import { Route as RegulamentoRouteImport } from './routes/regulamento'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,49 +28,110 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
   path: '/automacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContatosRoute = ContatosRouteImport.update({
-  id: '/contatos',
-  path: '/contatos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const InicioRoute = InicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembrosRoute = MembrosRouteImport.update({
+  id: '/membros',
+  path: '/membros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MensagensRoute = MensagensRouteImport.update({
+  id: '/mensagens',
+  path: '/mensagens',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceirosRoute = ParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParticipantesRoute = ParticipantesRouteImport.update({
+  id: '/participantes',
+  path: '/participantes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegulamentoRoute = RegulamentoRouteImport.update({
+  id: '/regulamento',
+  path: '/regulamento',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
-  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
+  '/membros': typeof MembrosRoute
+  '/mensagens': typeof MensagensRoute
+  '/parceiros': typeof ParceirosRoute
+  '/participantes': typeof ParticipantesRoute
+  '/regulamento': typeof RegulamentoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
-  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
+  '/membros': typeof MembrosRoute
+  '/mensagens': typeof MensagensRoute
+  '/parceiros': typeof ParceirosRoute
+  '/participantes': typeof ParticipantesRoute
+  '/regulamento': typeof RegulamentoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
-  '/contatos': typeof ContatosRoute
   '/inicio': typeof InicioRoute
+  '/membros': typeof MembrosRoute
+  '/mensagens': typeof MensagensRoute
+  '/parceiros': typeof ParceirosRoute
+  '/participantes': typeof ParticipantesRoute
+  '/regulamento': typeof RegulamentoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/automacoes' | '/contatos' | '/inicio'
+  fullPaths:
+    | '/'
+    | '/automacoes'
+    | '/inicio'
+    | '/membros'
+    | '/mensagens'
+    | '/parceiros'
+    | '/participantes'
+    | '/regulamento'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/automacoes' | '/contatos' | '/inicio'
-  id: '__root__' | '/' | '/automacoes' | '/contatos' | '/inicio'
+  to:
+    | '/'
+    | '/automacoes'
+    | '/inicio'
+    | '/membros'
+    | '/mensagens'
+    | '/parceiros'
+    | '/participantes'
+    | '/regulamento'
+  id:
+    | '__root__'
+    | '/'
+    | '/automacoes'
+    | '/inicio'
+    | '/membros'
+    | '/mensagens'
+    | '/parceiros'
+    | '/participantes'
+    | '/regulamento'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutomacoesRoute: typeof AutomacoesRoute
-  ContatosRoute: typeof ContatosRoute
   InicioRoute: typeof InicioRoute
+  MembrosRoute: typeof MembrosRoute
+  MensagensRoute: typeof MensagensRoute
+  ParceirosRoute: typeof ParceirosRoute
+  ParticipantesRoute: typeof ParticipantesRoute
+  RegulamentoRoute: typeof RegulamentoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,18 +150,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contatos': {
-      id: '/contatos'
-      path: '/contatos'
-      fullPath: '/contatos'
-      preLoaderRoute: typeof ContatosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/inicio': {
       id: '/inicio'
       path: '/inicio'
       fullPath: '/inicio'
       preLoaderRoute: typeof InicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membros': {
+      id: '/membros'
+      path: '/membros'
+      fullPath: '/membros'
+      preLoaderRoute: typeof MembrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mensagens': {
+      id: '/mensagens'
+      path: '/mensagens'
+      fullPath: '/mensagens'
+      preLoaderRoute: typeof MensagensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiros': {
+      id: '/parceiros'
+      path: '/parceiros'
+      fullPath: '/parceiros'
+      preLoaderRoute: typeof ParceirosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/participantes': {
+      id: '/participantes'
+      path: '/participantes'
+      fullPath: '/participantes'
+      preLoaderRoute: typeof ParticipantesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regulamento': {
+      id: '/regulamento'
+      path: '/regulamento'
+      fullPath: '/regulamento'
+      preLoaderRoute: typeof RegulamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -105,8 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutomacoesRoute: AutomacoesRoute,
-  ContatosRoute: ContatosRoute,
   InicioRoute: InicioRoute,
+  MembrosRoute: MembrosRoute,
+  MensagensRoute: MensagensRoute,
+  ParceirosRoute: ParceirosRoute,
+  ParticipantesRoute: ParticipantesRoute,
+  RegulamentoRoute: RegulamentoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

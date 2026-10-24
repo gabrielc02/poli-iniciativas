@@ -25,20 +25,32 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
           <Link to="/inicio" className={cn(navLink, pathname === "/inicio" && navActive)}>
             Iniciativas
           </Link>
-          <Link to="/contatos" className={cn(navLink, pathname === "/contatos" && navActive)}>
-            contatos
+          <Link to="/parceiros" className={cn(navLink, pathname === "/parceiros" && navActive)}>
+            parceiros
+          </Link>
+          <Link to="/membros" className={cn(navLink, pathname === "/membros" && navActive)}>
+            membros
           </Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            to="/contatos"
+            to="/parceiros"
             className={cn(
               "rounded-md px-3 py-1.5 text-sm font-semibold text-[#0B2545] transition hover:bg-[#0B2545]/10 md:hidden",
-              pathname === "/contatos" && navActive,
+              pathname === "/parceiros" && navActive,
             )}
           >
-            contatos
+            parceiros
+          </Link>
+          <Link
+            to="/membros"
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-semibold text-[#0B2545] transition hover:bg-[#0B2545]/10 md:hidden",
+              pathname === "/membrs" && navActive,
+            )}
+          >
+            membros
           </Link>
           <Link
             to="/automacoes"

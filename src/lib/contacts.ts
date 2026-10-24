@@ -205,8 +205,48 @@ export function filterContacts(contacts: Contact[], query: string): Contact[] {
   );
 }
 
+export type ContactSortKey = keyof Omit<Contact, "id">;
+export type SortDirection = "asc" | "desc";
+
+export function sortContacts(
+  contacts: Contact[],
+  key: ContactSortKey | null,
+  direction: SortDirection,
+): Contact[] {
+  if (!key) return contacts;
+  const statusOrder = CONTACT_STATUSES as readonly string[];
+  const factor = direction === "asc" ? 1 : -1;
+
+  return [...contacts].sort((a, b) => {
+    const av = a[key];
+    const bv = b[key];
+    if (key === "status") {
+      return (statusOrder.indexOf(av) - statusOrder.indexOf(bv)) * factor;
+    }
+    return String(av).localeCompare(String(bv), "pt-BR", { sensitivity: "base" }) * factor;
+  });
+}
+
 export function normalizeLinkedinUrl(url: string): string {
   if (!url) return "";
   if (/^https?:\/\//i.test(url)) return url;
   return `https://${url}`;
+}
+
+export type ContactField = Exclude<keyof Contact, "id" | "status">;
+
+export function createEmptyContact(overrides: Partial<Contact> = {}): Contact {
+  return {
+    id: `contact-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    empresa: "",
+    nome: "",
+    email: "",
+    numero: "",
+    linkedin: "",
+    responsavel: "",
+    status: "Novo",
+    observacoes: "",
+    ramo: "",
+    ...overrides,
+  };
 }
