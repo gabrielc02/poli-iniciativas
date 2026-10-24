@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import gremioInvertido from "@/assets/gremio_invertido.avif";
-import { getUser, setUser } from "@/lib/initiatives";
+import { supabase } from "../lib/supabase"; 
+
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,74 +19,185 @@ export const Route = createFileRoute("/")({
   component: Login,
 });
 
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden>
-      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
-      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
-      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/>
-    </svg>
-  );
-}
 
 function Login() {
   const navigate = useNavigate();
+
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
   useEffect(() => {
-    if (getUser()) navigate({ to: "/inicio", replace: true });
+    let active = true;
+
+    const checkSession = async () => {
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        if (active && session) {
+          navigate({ to: "/inicio", replace: true });
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+      }
+    };
+
+    void checkSession();
+
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
-  const signIn = () => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (loading) return;
+
     setLoading(true);
-    setTimeout(() => {
-      setUser({ name: "Gabriel Chaves", email: "gabriel.chaves@usp.br" });
-      navigate({ to: "/inicio" });
-    }, 1100);
+    setMessage(null);
+
+    try {
+      // 1. Valida o código no servidor.
+      const { data, error } = await supabase.functions.invoke(
+        "code-login",
+        {
+          body: { code },
+        },
+      );
+
+      if (error) throw error;
+
+      if (!data?.token_hash) {
+        throw new Error("Não foi possível validar o acesso.");
+      }
+
+      // 2. Troca o token por uma sessão real do Supabase Auth.
+      const { error: authError } = await supabase.auth.verifyOtp({
+        token_hash: data.token_hash,
+        type: "magiclink",
+      });
+
+      if (authError) throw authError;
+
+      // 3. Redireciona após a sessão ser estabelecida.
+      navigate({ to: "/inicio", replace: true });
+    } catch (error) {
+      console.error("Falha no login:", error);
+
+      setMessage(
+        "Código inválido ou falha ao autenticar. Tente novamente.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
+      {/* Coluna esquerda */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gremio-hero p-12 lg:flex">
         <Logo light link={false} />
+
         <div className="relative z-10 max-w-lg text-white">
           <h1 className="font-display text-4xl font-bold uppercase leading-tight tracking-wide xl:text-5xl">
             Grêmio Politécnico da USP
           </h1>
-          <p className="mt-3 text-lg text-white/85">Desde 1903 representando os alunos da Poli</p>
+
+          <p className="mt-3 text-lg text-white/85">
+            Desde 1903 representando os alunos da Poli
+          </p>
+
           <p className="mt-5 text-sm leading-relaxed text-white/75">
-            Acompanhe, proponha e celebre as iniciativas do Grêmio em um só lugar.
+            Acompanhe, proponha e celebre as iniciativas do Grêmio
+            em um só lugar.
           </p>
         </div>
-        <p className="relative z-10 text-xs text-white/50">© 2026 Grêmio Politécnico da USP</p>
+
+        <p className="relative z-10 text-xs text-white/50">
+          © 2026 Grêmio Politécnico da USP
+        </p>
+
         <img
           src={gremioInvertido}
           alt=""
-          aria-hidden
+          aria-hidden="true"
           className="pointer-events-none absolute -right-10 bottom-8 h-72 w-72 object-contain opacity-80 xl:h-96 xl:w-96"
         />
       </div>
 
+      {/* Coluna direita */}
       <div className="flex items-center justify-center bg-white p-6">
         <div className="w-full max-w-sm space-y-8">
           <div className="lg:hidden">
             <Logo link={false} />
           </div>
+
           <div>
             <h2 className="font-display text-3xl font-bold uppercase tracking-wide text-[#0B2545]">
               Bem-vindo(a)
             </h2>
-            <p className="mt-2 text-[#0B2545]/70">Entre com sua conta USP do Google para continuar.</p>
+
+            <p className="mt-2 text-[#0B2545]/70">
+              Digite seu código de acesso para continuar.
+            </p>
           </div>
-          <button
-            onClick={signIn}
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-[#0B2545] bg-white px-4 py-3 font-semibold text-[#0B2545] shadow-sm transition hover:bg-[#0B2545] hover:text-white disabled:opacity-70"
-          >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon />}
-            {loading ? "Conectando..." : "Entrar com o Google"}
-          </button>
-          <p className="text-center text-xs text-[#0B2545]/55">Acesso restrito a e-mails @usp.br</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label
+                htmlFor="access-code"
+                className="block text-sm font-semibold text-[#0B2545]"
+              >
+                Código de acesso
+              </label>
+
+              <input
+                id="access-code"
+                type="password"
+                autoComplete="current-password"
+                required
+                maxLength={256}
+                placeholder="Digite seu código"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-[#0B2545]/30 px-4 py-2.5 text-sm text-[#0B2545] placeholder-[#0B2545]/40 focus:border-[#0B2545] focus:outline-none focus:ring-1 focus:ring-[#0B2545]"
+              />
+            </div>
+
+            {message && (
+              <p
+                role="alert"
+                className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+              >
+                {message}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !code.trim()}
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-[#0B2545] bg-[#0B2545] px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-white hover:text-[#0B2545] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                <span>Acessar Plataforma</span>
+              )}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-[#0B2545]/55">
+            Acesso restrito a pessoas autorizadas.
+          </p>
         </div>
       </div>
     </main>

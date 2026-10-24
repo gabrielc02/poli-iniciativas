@@ -1,28 +1,47 @@
-import semana from "@/assets/sem_recp_2026.jpg";
-import hacka from "@/assets/hackaPoli_2026.png";
-
+import { supabase } from "@/lib/supabase";
 
 export type Initiative = {
   id: string;
   name: string;
-  category: "Evento" | "Infraestrutura" | "Cultura" | "Esporte" | "Educação" | "Tecnologia";
+  category:
+    | "Evento"
+    | "Infraestrutura"
+    | "Cultura"
+    | "Esporte"
+    | "Educação"
+    | "Tecnologia";
   date: string;
   image: string;
   status: "andamento" | "concluido";
 };
 
-export const ongoing: Initiative[] = [
-  { id: "1", name: "HackaPoli - 2026", category: "Evento", date: "Nov 2026", image: hacka, status: "andamento" },
-];
+export async function getInitiatives(): Promise<Initiative[]> {
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
 
-export const past: Initiative[] = [
-  { id: "2", name: "Semana de Recepção dos Calouros USP - 2026", category: "Evento", date: "Fev 2026", image: semana, status: "concluido" },
-];
+  const { data, error } = await supabase
+    .from("iniciativas")
+    .select("id, nome, descricao, status, categoria, data_inicio, image")
+    .order("data_inicio", { ascending: false });
 
-const KEY = "gpusp-user";
-export type User = { name: string; email: string };
-export const getUser = (): User | null => {
-  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; }
+  console.log("Dados recebidos:", data);
+  console.log("Erro Supabase:", error);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((item) => ({
+    id: String(item.id),
+    name: item.nome,
+    category: item.categoria,
+    date: item.data_inicio,
+    image: item.image,
+    status: item.status,
+  }));
+}
+
+export type User = {
+  name: string;
+  email: string;
 };
-export const setUser = (u: User | null) =>
-  u ? localStorage.setItem(KEY, JSON.stringify(u)) : localStorage.removeItem(KEY);

@@ -9,7 +9,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHero } from "@/components/SiteHero";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getUser, setUser, type User } from "@/lib/initiatives";
+import type { User } from "@/lib/initiatives";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/automacoes")({
   head: () => ({
@@ -395,7 +396,7 @@ function TaskForm({ initial, submitLabel, onSubmit, onCancel }: {
   );
 }
 
-function TaskList() {
+function TaskList({ autor }: { autor: string }) {
   const [open, setOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(seedTasks);
   const loaded = useRef(false);
@@ -448,7 +449,6 @@ function TaskList() {
   const addComment = (t: Task) => {
     const texto = draft.trim();
     if (!texto) return;
-    const autor = getUser()?.name?.split(" ")[0] ?? "Você";
     patch(t.id, { comentarios: [...t.comentarios, { id: uid(), autor, texto, data: now() }] });
     setDraft("");
   };
@@ -624,15 +624,39 @@ function RulesLink() {
 function Automations() {
   const navigate = useNavigate();
   const [user, setU] = useState<User | null>(null);
+  // Confirma a sessão do Supabase; sem login, volta para a tela inicial.
   useEffect(() => {
-    const u = getUser();
-    if (!u) navigate({ to: "/", replace: true });
-    else setU(u);
+    let cancelled = false;
+
+    async function checkSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (error || !data.session) {
+        navigate({ to: "/", replace: true });
+        return;
+      }
+
+      const authUser = data.session.user;
+      setU({
+        name:
+          authUser.user_metadata?.["name"] ??
+          authUser.user_metadata?.["full_name"] ??
+          authUser.email?.split("@")[0] ??
+          "Usuário",
+        email: authUser.email ?? "",
+      });
+    }
+
+    void checkSession();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
   if (!user) return null;
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate({ to: "/", replace: true });
   };
 
@@ -648,7 +672,7 @@ function Automations() {
         <Sponsors />
         <WhatsApp />
         <ContactList />
-        <TaskList />
+        <TaskList autor={user.name.split(" ")[0] ?? "Você"} />
         <MessageTemplates />
         <RulesLink />
       </main>

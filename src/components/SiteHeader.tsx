@@ -47,7 +47,7 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
             to="/membros"
             className={cn(
               "rounded-md px-3 py-1.5 text-sm font-semibold text-[#0B2545] transition hover:bg-[#0B2545]/10 md:hidden",
-              pathname === "/membrs" && navActive,
+              pathname === "/membros" && navActive,
             )}
           >
             membros
@@ -60,16 +60,6 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
             <span className="hidden sm:inline">Nova Iniciativa</span>
             <span className="sm:hidden">Nova</span>
           </Link>
-          <div
-            className="hidden h-9 w-9 items-center justify-center rounded-full bg-[#0B2545] text-xs font-bold text-white sm:flex"
-            title={user.email}
-          >
-            {user.name
-              .split(" ")
-              .map((p) => p[0])
-              .slice(0, 2)
-              .join("")}
-          </div>
           <button
             type="button"
             onClick={onLogout}

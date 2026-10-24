@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { CheckCircle2, Copy, ExternalLink, Linkedin, Mail, MessageCircle, RotateCcw } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHero } from "@/components/SiteHero";
-import { getUser, setUser, type User } from "@/lib/initiatives";
+import type { User } from "@/lib/initiatives";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/mensagens")({
   head: () => ({
@@ -51,7 +52,7 @@ Acredito que sua experiência traria um valor inestimável para a nova geração
   {
     id: "email-patrocinio",
     midia: "email",
-    finalidade: "Convite de parceria",
+    finalidade: "Convite para patrocínio",
     assunto: "Convite de parceria: Hack@Poli 2026",
     corpo: `Prezado(a) {{contato}},
 
@@ -126,10 +127,34 @@ function Mensagens() {
   const [custom, setCustom] = useState<string | null>(null); // edição manual do texto
   const [copied, setCopied] = useState<"corpo" | "assunto" | null>(null);
 
+  // Confirma a sessão do Supabase; sem login, volta para a tela inicial.
   useEffect(() => {
-    const u = getUser();
-    if (!u) navigate({ to: "/", replace: true });
-    else setU(u);
+    let cancelled = false;
+
+    async function checkSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (error || !data.session) {
+        navigate({ to: "/", replace: true });
+        return;
+      }
+
+      const authUser = data.session.user;
+      setU({
+        name:
+          authUser.user_metadata?.["name"] ??
+          authUser.user_metadata?.["full_name"] ??
+          authUser.email?.split("@")[0] ??
+          "Usuário",
+        email: authUser.email ?? "",
+      });
+    }
+
+    void checkSession();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const disponiveis = useMemo(() => templates.filter((t) => t.midia === midia), [midia]);
@@ -141,8 +166,8 @@ function Mensagens() {
 
   if (!user) return null;
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate({ to: "/", replace: true });
   };
 

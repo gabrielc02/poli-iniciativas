@@ -38,7 +38,6 @@ import {
   STATUS_BADGE_CLASS,
   createEmptyContact,
   filterContacts,
-  loadContactsFromCsv,
   normalizeLinkedinUrl,
   sortContacts,
   type Contact,
@@ -47,8 +46,10 @@ import {
   type ContactStatus,
   type SortDirection,
 } from "@/lib/contacts";
-import { getUser, setUser, type User } from "@/lib/initiatives";
+import { supabase } from "@/lib/supabase";
+import type { User } from "@/lib/initiatives";
 import { cn } from "@/lib/utils";
+import { getParceiros } from "@/lib/parceiros";
 
 export const Route = createFileRoute("/parceiros")({
   head: () => ({
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/parceiros")({
       },
     ],
   }),
-  component: ContatosPage,
+  component: ParceirosPage,
 });
 
 function StatusSelect({
@@ -284,6 +285,15 @@ function downloadCsv(content: string, filename: string) {
 
 const PAGE_SIZE = 15;
 
+// Converte o status vindo do Supabase para um status válido da página.
+function normalizarStatus(status: string | null): ContactStatus {
+  return (
+    CONTACT_STATUSES.find((s) => s === status) ??
+    CONTACT_STATUSES[0] ??
+    ("Novo" as ContactStatus)
+  );
+}
+
 // Números de página com reticências: 1 … 4 5 6 … 20
 function getPageItems(current: number, total: number): (number | "…")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -292,7 +302,10 @@ function getPageItems(current: number, total: number): (number | "…")[] {
     .sort((a, b) => a - b);
   const items: (number | "…")[] = [];
   pages.forEach((p, i) => {
-    if (i > 0 && p - pages[i - 1] > 1) items.push("…");
+    const previousPage = pages[i - 1];
+    if (previousPage !== undefined && p - previousPage > 1) {
+      items.push("…");
+    }
     items.push(p);
   });
   return items;
@@ -368,10 +381,10 @@ function PaginationBar({
   );
 }
 
-function ContatosPage() {
+function ParceirosPage() {
   const navigate = useNavigate();
   const [user, setU] = useState<User | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contatos, setContatos] = useState<Contact[]>([]);
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<ContactSortKey | null>("empresa");
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
@@ -380,36 +393,39 @@ function ContatosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const u = getUser();
-    if (!u) navigate({ to: "/", replace: true });
-    else setU(u);
-  }, [navigate]);
-
+  // Confirma a sessão; sem login, volta para a tela inicial.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const rows = await loadContactsFromCsv();
-        if (!cancelled) setContacts(rows);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Falha ao carregar parceiros.");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+
+    async function checkSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (error || !data.session) {
+        navigate({ to: "/", replace: true });
+        return;
       }
-    })();
+
+      const authUser = data.session.user;
+      setU({
+        name:
+          authUser.user_metadata?.["name"] ??
+          authUser.user_metadata?.["full_name"] ??
+          authUser.email?.split("@")[0] ??
+          "Usuário",
+        email: authUser.email ?? "",
+      });
+    }
+
+    void checkSession();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   const visible = useMemo(
-    () => sortContacts(filterContacts(contacts, query), sortKey, sortDir),
-    [contacts, query, sortKey, sortDir],
+    () => sortContacts(filterContacts(contatos, query), sortKey, sortDir),
+    [contatos, query, sortKey, sortDir],
   );
 
   const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
@@ -424,10 +440,55 @@ function ContatosPage() {
     setJumpToId(null);
   }, [jumpToId, visible]);
 
+  // Carrega os parceiros do Supabase somente depois que a sessão foi confirmada.
+  // IMPORTANTE: todo hook precisa ficar ANTES do "return null" condicional abaixo.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    async function carregar() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getParceiros();
+        if (cancelled) return;
+
+        setContatos(
+          data.map((p) => ({
+            id: p.id,
+            empresa: p.nome_organizacao ?? "",
+            nome: p.ponto_de_contato ?? "",
+            numero: p.telefone ?? "",
+            responsavel: p.ponto_de_contato ?? "",
+            ramo: p.ramo ?? "",
+            linkedin: p.linkedin ?? "",
+            email: p.email ?? "",
+            status: normalizarStatus(p.status),
+            observacoes: p.observacoes ?? "",
+          })),
+        );
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Erro ao carregar parceiros:", err);
+        setError(
+          err instanceof Error ? err.message : "Falha ao carregar parceiros do Supabase.",
+        );
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void carregar();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   if (!user) return null;
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate({ to: "/", replace: true });
   };
 
@@ -442,11 +503,11 @@ function ContatosPage() {
   };
 
   const updateField = (id: string, field: ContactField, value: string) => {
-    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+    setContatos((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
   };
 
   const updateStatus = (id: string, status: ContactStatus) => {
-    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+    setContatos((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
   };
 
   const addContact = () => {
@@ -455,26 +516,24 @@ function ContatosPage() {
       empresa: "Nova empresa",
       nome: "Novo contato",
     });
-    setContacts((prev) => [novo, ...prev]);
+    setContatos((prev) => [novo, ...prev]);
     setQuery("");
     setJumpToId(novo.id);
-    toast.success("Contato adicionado", {
-      description: "Clique nos campos para editar.",
-    });
+    toast.success("Contato adicionado", { description: "Clique nos campos para editar." });
   };
 
   const removeContact = (id: string) => {
-    const target = contacts.find((c) => c.id === id);
-    setContacts((prev) => prev.filter((c) => c.id !== id));
+    const target = contatos.find((c) => c.id === id);
+    setContatos((prev) => prev.filter((c) => c.id !== id));
     toast.success("Contato removido", {
       description: target?.empresa || target?.nome || "Registro excluído da lista.",
     });
   };
 
   const exportCsv = () => {
-    downloadCsv(contactsToCsv(contacts), "contatosEmpresas.csv");
+    downloadCsv(contactsToCsv(contatos), "contatosEmpresas.csv");
     toast.success("CSV exportado", {
-      description: `${contacts.length} parceiros. Substitua data/contatosEmpresas.csv pelo arquivo baixado.`,
+      description: `${contatos.length} parceiros exportados.`,
     });
   };
 
@@ -487,8 +546,9 @@ function ContatosPage() {
         subtitle="Desde 1903 representando os alunos da Poli"
       >
         <p>
-          Base carregada de <span className="font-semibold text-white">data/contatosEmpresas.csv</span>.
-          Clique em um campo para editar; adicione ou remova parceiros antes do disparo. As alterações ficam só neste navegador: use “Baixar CSV” para exportar a lista e substituir o arquivo.
+          Base carregada do Supabase. Clique em um campo para editar; adicione ou remova parceiros
+          antes do disparo. As alterações ficam só neste navegador e são descartadas ao recarregar:
+          use “Baixar CSV” para exportar a lista.
         </p>
       </SiteHero>
 
@@ -513,12 +573,12 @@ function ContatosPage() {
           </div>
           <div className="flex items-center gap-3">
             <p className="text-xs text-[#0B2545]/70">
-              {loading ? "Carregando…" : `${visible.length} de ${contacts.length} parceiros`}
+              {loading ? "Carregando…" : `${visible.length} de ${contatos.length} parceiros`}
             </p>
             <button
               type="button"
               onClick={exportCsv}
-              disabled={loading || contacts.length === 0}
+              disabled={loading || contatos.length === 0}
               className="inline-flex items-center gap-1.5 rounded-md border border-[#0B2545] px-3 py-1.5 text-xs font-semibold text-[#0B2545] transition hover:bg-[#0B2545] hover:text-white disabled:opacity-60"
             >
               <Download className="h-3.5 w-3.5" /> Baixar CSV
@@ -537,7 +597,7 @@ function ContatosPage() {
         <div className="rounded-lg border border-[#0B2545]/15 bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center gap-2 px-6 py-16 text-sm text-[#0B2545]/70">
-              <Loader2 className="h-4 w-4 animate-spin" /> Lendo contatosEmpresas.csv…
+              <Loader2 className="h-4 w-4 animate-spin" /> Carregando parceiros…
             </div>
           ) : error ? (
             <div className="px-6 py-12 text-center text-sm text-destructive">{error}</div>
