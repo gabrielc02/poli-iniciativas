@@ -9,6 +9,7 @@ export type Inscrito = {
   ano_ingresso: string | null; // "Em que ano você ingressou na Poli?"
   linkedin: string | null;
   inscrito_em: string | null; // data/hora da inscrição no Luma (ISO)
+  checked_in_at: string | null; // data/hora do check-in no Luma (null = não fez check-in)
   status: string | null; // status de aprovação exatamente como veio do Luma
   time_original: string | null; // time informado no formulário do Luma
   time_corrigido: string | null; // ajuste feito na página: null = usar o original, "" = sem time
@@ -23,12 +24,29 @@ export type InscritoImport = {
   ano_ingresso: string | null;
   linkedin: string | null;
   inscrito_em: string | null;
+  checked_in_at: string | null;
   status: string | null;
   time_original: string | null;
 };
 
+export type StatusKey = "aprovado" | "pendente" | "recusado" | "outro";
+
+// Traduz o status do Luma (approved, pending_approval, declined...) para 4 categorias.
+export function classificarStatus(status: string | null): StatusKey {
+  const n = (status ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  if (/pending|pendente|aguard/.test(n)) return "pendente";
+  if (/declin|recus|rejeit|not going|nao vai/.test(n)) return "recusado";
+  if (/approv|aprov|going|confirm/.test(n)) return "aprovado";
+  return "outro";
+}
+
 const COLUNAS =
-  "id, email, nome, telefone, curso, ano_ingresso, linkedin, inscrito_em, status, time_original, time_corrigido";
+  "id, email, nome, telefone, curso, ano_ingresso, linkedin, inscrito_em, checked_in_at, status, time_original, time_corrigido";
 
 export async function getInscritos(): Promise<Inscrito[]> {
   const { data, error } = await supabase

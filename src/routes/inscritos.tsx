@@ -9,9 +9,11 @@ import type { User } from "@/lib/initiatives";
 import { supabase } from "@/lib/supabase";
 import {
   atualizarTime,
+  classificarStatus,
   getInscritos,
   importarInscritos,
   type Inscrito,
+  type StatusKey,
   type InscritoImport,
 } from "@/lib/inscritos";
 
@@ -60,16 +62,7 @@ const norm = (s: string) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-type StatusKey = "aprovado" | "pendente" | "recusado" | "outro";
-
-// Traduz o status do Luma (approved, pending_approval, declined...) para 4 categorias.
-function classificar(status: string | null): StatusKey {
-  const n = norm(status ?? "");
-  if (/pending|pendente|aguard/.test(n)) return "pendente";
-  if (/declin|recus|rejeit|not going|nao vai/.test(n)) return "recusado";
-  if (/approv|aprov|going|confirm/.test(n)) return "aprovado";
-  return "outro";
-}
+const classificar = classificarStatus;
 
 const statusLabel: Record<StatusKey, string> = {
   aprovado: "Aprovado",
@@ -148,7 +141,7 @@ function parseCsv(texto: string): string[][] {
   return rows.filter((r) => r.some((c) => c.trim() !== ""));
 }
 
-type Campo = "email" | "nome" | "time" | "status" | "data" | "curso" | "ano" | "linkedin" | "telefone";
+type Campo = "email" | "nome" | "time" | "status" | "data" | "checkin" | "curso" | "ano" | "linkedin" | "telefone";
 type Mapa = Record<Campo, string>; // campo -> nome da coluna do CSV ("" = nenhuma)
 
 const camposMapa: { campo: Campo; label: string; obrigatorio?: boolean }[] = [
@@ -157,6 +150,7 @@ const camposMapa: { campo: Campo; label: string; obrigatorio?: boolean }[] = [
   { campo: "time", label: "Time / equipe" },
   { campo: "status", label: "Status de aprovação" },
   { campo: "data", label: "Data da inscrição" },
+  { campo: "checkin", label: "Check-in (data/hora)" },
   { campo: "curso", label: "Engenharia / curso" },
   { campo: "ano", label: "Ano de ingresso" },
   { campo: "linkedin", label: "LinkedIn" },
@@ -195,6 +189,7 @@ function detectarMapa(headers: string[]): Mapa {
         (h) => /\b(time|equipe|team|grupo)\b/.test(h) && !h.includes("timezone") && !h.includes("zone"),
       ),
     ),
+    checkin: usar("checkin", achar((h) => h === "checked in at", (h) => h.includes("checked in") || h.includes("check in"))),
     curso: usar("curso", achar((h) => h.includes("engenharia"), (h) => h.includes("curso"))),
     ano: usar("ano", achar((h) => h.includes("ano") && h.includes("ingress"))),
     linkedin: usar("linkedin", achar((h) => h.includes("linkedin") && !h.includes("click"))),
@@ -214,6 +209,8 @@ function montarImportacao(headers: string[], rows: string[][], mapa: Mapa): Insc
 
     const dataBruta = get(r, idx("data"));
     const d = dataBruta ? new Date(dataBruta) : null;
+    const checkinBruto = get(r, idx("checkin"));
+    const ci = checkinBruto ? new Date(checkinBruto) : null;
 
     porEmail.set(email, {
       email,
@@ -223,6 +220,7 @@ function montarImportacao(headers: string[], rows: string[][], mapa: Mapa): Insc
       ano_ingresso: get(r, idx("ano")) || null,
       linkedin: get(r, idx("linkedin")) || null,
       inscrito_em: d && !Number.isNaN(d.getTime()) ? d.toISOString() : null,
+      checked_in_at: ci && !Number.isNaN(ci.getTime()) ? ci.toISOString() : null,
       status: get(r, idx("status")) || null,
       time_original: get(r, idx("time")) || null,
     });

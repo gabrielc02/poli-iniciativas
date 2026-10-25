@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
-  Award, Send, Loader2, CheckCircle2, FileSpreadsheet, Download,
+  Award, Send,
   ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText, Users,
 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -23,8 +23,6 @@ export const Route = createFileRoute("/automacoes")({
   }),
   component: Automations,
 });
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const btnCta =
   "inline-flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-70";
@@ -47,59 +45,13 @@ function AutomationCard({ icon, title, desc, tag, children }: { icon: ReactNode;
   );
 }
 
-/* 1. Certificados */
-function Certificates() {
-  const input = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<"idle" | "running" | "done">("idle");
-  const [progress, setProgress] = useState(0);
-  const [file, setFile] = useState("");
-  const total = 247;
-
-  const run = async (name: string) => {
-    setFile(name); setState("running"); setProgress(0);
-    for (let p = 0; p <= 100; p += 5) { setProgress(p); await sleep(90); }
-    setState("done");
-    toast.success("Automação executada com sucesso!", { description: `${total} certificados gerados a partir de ${name}.` });
-  };
-
+/* 1. Certificados (link para /certificados) */
+function CertificatesLink() {
+  const navigate = useNavigate();
   return (
     <AutomationCard icon={<Award className="h-6 w-6" />} tag="Eventos" title="Gerador de Certificados"
-      desc="Faça o upload do CSV do Even3 e gere todos os PDFs de certificados formatados de uma só vez para impressão.">
-      <input ref={input} type="file" accept=".csv" className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) run(f.name); e.target.value = ""; }} />
-      {state === "running" && (
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><FileSpreadsheet className="h-3.5 w-3.5" />{file}</span>
-            <span>{Math.round((progress / 100) * total)}/{total}</span>
-          </div>
-          <Progress value={progress} />
-        </div>
-      )}
-      {state === "done" ? (
-        <>
-          <div className="flex items-center gap-2 rounded-md bg-success/10 p-3 text-sm font-medium text-success">
-            <CheckCircle2 className="h-4 w-4" /> {total} PDFs prontos para impressão
-          </div>
-          <div className="flex gap-2">
-            <button className={btnPrimary + " flex-1"} onClick={() => toast.info("Download simulado: certificados.zip")}>
-              <Download className="h-4 w-4" /> Baixar ZIP
-            </button>
-            <button className="rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-muted" onClick={() => setState("idle")}>Nova</button>
-          </div>
-        </>
-      ) : (
-        <>
-          <button className={btnCta} disabled={state === "running"} onClick={() => input.current?.click()}>
-            {state === "running" ? <><Loader2 className="h-4 w-4 animate-spin" /> Gerando...</> : "Iniciar Geração"}
-          </button>
-          {state === "idle" && (
-            <button className="w-full text-xs font-medium text-secondary underline-offset-2 hover:underline" onClick={() => run("inscritos_even3_semana.csv")}>
-              Usar CSV de exemplo
-            </button>
-          )}
-        </>
-      )}
+      desc="Envie a arte, marque onde fica o nome e gere os PDFs dos inscritos aprovados, com opção de certificado manual e confirmação de envio por e-mail.">
+      <button className={btnCta} onClick={() => navigate({ to: "/certificados" })}>Abrir Gerador</button>
     </AutomationCard>
   );
 }
@@ -490,7 +442,7 @@ function Automations() {
       <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-3">
         <TaskList autor={user.name.split(" ")[0] ?? "Você"} />
         <InscritosLink />
-        <Certificates />
+        <CertificatesLink />
         <MessageTemplates />
         <RulesLink />
       </main>
