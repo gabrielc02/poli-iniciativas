@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as InscritosRouteImport } from './routes/inscritos'
 import { Route as MembrosRouteImport } from './routes/membros'
 import { Route as MensagensRouteImport } from './routes/mensagens'
 import { Route as ParceirosRouteImport } from './routes/parceiros'
@@ -31,6 +32,11 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
 const InicioRoute = InicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscritosRoute = InscritosRouteImport.update({
+  id: '/inscritos',
+  path: '/inscritos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembrosRoute = MembrosRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/inicio': typeof InicioRoute
+  '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
   '/mensagens': typeof MensagensRoute
   '/parceiros': typeof ParceirosRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/inicio': typeof InicioRoute
+  '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
   '/mensagens': typeof MensagensRoute
   '/parceiros': typeof ParceirosRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/inicio': typeof InicioRoute
+  '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
   '/mensagens': typeof MensagensRoute
   '/parceiros': typeof ParceirosRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/inicio'
+    | '/inscritos'
     | '/membros'
     | '/mensagens'
     | '/parceiros'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/inicio'
+    | '/inscritos'
     | '/membros'
     | '/mensagens'
     | '/parceiros'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/inicio'
+    | '/inscritos'
     | '/membros'
     | '/mensagens'
     | '/parceiros'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutomacoesRoute: typeof AutomacoesRoute
   InicioRoute: typeof InicioRoute
+  InscritosRoute: typeof InscritosRoute
   MembrosRoute: typeof MembrosRoute
   MensagensRoute: typeof MensagensRoute
   ParceirosRoute: typeof ParceirosRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/inicio'
       fullPath: '/inicio'
       preLoaderRoute: typeof InicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscritos': {
+      id: '/inscritos'
+      path: '/inscritos'
+      fullPath: '/inscritos'
+      preLoaderRoute: typeof InscritosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/membros': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutomacoesRoute: AutomacoesRoute,
   InicioRoute: InicioRoute,
+  InscritosRoute: InscritosRoute,
   MembrosRoute: MembrosRoute,
   MensagensRoute: MensagensRoute,
   ParceirosRoute: ParceirosRoute,

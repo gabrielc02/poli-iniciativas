@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   Award, Send, Loader2, CheckCircle2, FileSpreadsheet, Download,
-  ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText,
+  ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText, Users,
 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHero } from "@/components/SiteHero";
@@ -430,6 +430,17 @@ function RulesLink() {
   );
 }
 
+/* 8. Inscritos (link para /inscritos) */
+function InscritosLink() {
+  const navigate = useNavigate();
+  return (
+    <AutomationCard icon={<Users className="h-6 w-6" />} tag="Inscrições" title="Inscritos"
+      desc="Importe o CSV do Luma e veja os inscritos agrupados por time: contagem, pessoas sem time e pendentes com ou sem time.">
+      <button className={btnCta} onClick={() => navigate({ to: "/inscritos" })}>Abrir Inscritos</button>
+    </AutomationCard>
+  );
+}
+
 function Automations() {
   const navigate = useNavigate();
   const [user, setU] = useState<User | null>(null);
@@ -476,8 +487,9 @@ function Automations() {
         title="Central de Automações"
         subtitle="Nova iniciativa — tarefas repetitivas do Grêmio em um clique"
       />
-      <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-4">
+      <main className="grid gap-6 bg-white px-6 py-10 sm:grid-cols-2 md:px-10 xl:grid-cols-3">
         <TaskList autor={user.name.split(" ")[0] ?? "Você"} />
+        <InscritosLink />
         <Certificates />
         <MessageTemplates />
         <RulesLink />
