@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as CertificadosRouteImport } from './routes/certificados'
+import { Route as ContratosRouteImport } from './routes/contratos'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as InscritosRouteImport } from './routes/inscritos'
 import { Route as MembrosRouteImport } from './routes/membros'
@@ -33,6 +34,11 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
 const CertificadosRoute = CertificadosRouteImport.update({
   id: '/certificados',
   path: '/certificados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContratosRoute = ContratosRouteImport.update({
+  id: '/contratos',
+  path: '/contratos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InicioRoute = InicioRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/certificados': typeof CertificadosRoute
+  '/contratos': typeof ContratosRoute
   '/inicio': typeof InicioRoute
   '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/certificados': typeof CertificadosRoute
+  '/contratos': typeof ContratosRoute
   '/inicio': typeof InicioRoute
   '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/automacoes': typeof AutomacoesRoute
   '/certificados': typeof CertificadosRoute
+  '/contratos': typeof ContratosRoute
   '/inicio': typeof InicioRoute
   '/inscritos': typeof InscritosRoute
   '/membros': typeof MembrosRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/certificados'
+    | '/contratos'
     | '/inicio'
     | '/inscritos'
     | '/membros'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/certificados'
+    | '/contratos'
     | '/inicio'
     | '/inscritos'
     | '/membros'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automacoes'
     | '/certificados'
+    | '/contratos'
     | '/inicio'
     | '/inscritos'
     | '/membros'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutomacoesRoute: typeof AutomacoesRoute
   CertificadosRoute: typeof CertificadosRoute
+  ContratosRoute: typeof ContratosRoute
   InicioRoute: typeof InicioRoute
   InscritosRoute: typeof InscritosRoute
   MembrosRoute: typeof MembrosRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/certificados'
       fullPath: '/certificados'
       preLoaderRoute: typeof CertificadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contratos': {
+      id: '/contratos'
+      path: '/contratos'
+      fullPath: '/contratos'
+      preLoaderRoute: typeof ContratosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inicio': {
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutomacoesRoute: AutomacoesRoute,
   CertificadosRoute: CertificadosRoute,
+  ContratosRoute: ContratosRoute,
   InicioRoute: InicioRoute,
   InscritosRoute: InscritosRoute,
   MembrosRoute: MembrosRoute,

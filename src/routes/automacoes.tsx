@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   Award, Send,
-  ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, ScrollText, Users,
+  ListChecks, Plus, Pencil, Trash2, MessageSquare, ChevronDown, User as UserIcon, FileText, FileSignature, ScrollText, Users,
 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHero } from "@/components/SiteHero";
@@ -393,6 +393,17 @@ function InscritosLink() {
   );
 }
 
+/* 9. Contratos (link para /contratos) */
+function ContractsLink() {
+  const navigate = useNavigate();
+  return (
+    <AutomationCard icon={<FileSignature className="h-6 w-6" />} tag="Patrocínio" title="Contratos de Patrocínio"
+      desc="Envie a lista de empresas (nome e CNPJ), confira o template do contrato e baixe um contrato por empresa, em .doc ou .zip.">
+      <button className={btnCta} onClick={() => navigate({ to: "/contratos" })}>Abrir Contratos</button>
+    </AutomationCard>
+  );
+}
+
 function Automations() {
   const navigate = useNavigate();
   const [user, setU] = useState<User | null>(null);
@@ -443,6 +454,7 @@ function Automations() {
         <TaskList autor={user.name.split(" ")[0] ?? "Você"} />
         <InscritosLink />
         <CertificatesLink />
+        <ContractsLink />
         <MessageTemplates />
         <RulesLink />
       </main>
