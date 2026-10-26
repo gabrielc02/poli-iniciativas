@@ -229,6 +229,41 @@ function ContratosPage() {
                       )}
                     </label>
                   ))}
+                  {grupo.startsWith("Quem assina pelo Grêmio") && (() => {
+                    const numero = Number(grupo.match(/\((\d)\)/)?.[1] ?? 1);
+                    const chave = (`assin${numero}Imagem`) as "assin1Imagem" | "assin2Imagem" | "assin3Imagem";
+                    return (
+                      <label className="ct-campo">
+                        <span>Imagem da assinatura (opcional · PNG/JPG)</span>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (!["image/png", "image/jpeg"].includes(file.type)) {
+                              e.target.value = "";
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              if (typeof reader.result === "string") {
+                                setGremio((atual) => ({ ...atual, [chave]: reader.result as string }));
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                            e.target.value = "";
+                          }}
+                        />
+                        {gremio[chave] && (
+                          <div className="ct-assinatura-preview">
+                            <img src={gremio[chave]} alt={`Prévia da assinatura ${numero}`} />
+                            <button type="button" className="ct-sec" onClick={() => setGremio((atual) => ({ ...atual, [chave]: "" }))}>Remover imagem</button>
+                          </div>
+                        )}
+                      </label>
+                    );
+                  })()}
                 </fieldset>
               ))}
             </details>
@@ -343,6 +378,6 @@ const CSS_PAGINA = `
 .ct-opcoes select{width:auto}
 .ct-check{display:flex;gap:6px;align-items:center}
 .ct-papel{background:#fff;border:1px solid var(--ct-borda);border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:clamp(18px,4vw,56px);max-width:850px;overflow-x:auto}
-.ct-vazio{background:var(--ct-painel);border:1px dashed var(--ct-borda);border-radius:8px;padding:28px;color:var(--ct-suave);text-align:center}
+.ct-vazio{background:var(--ct-painel);border:1px dashed var(--ct-borda);border-radius:8px;padding:28px;color:var(--ct-suave);text-align:center}\n.ct-assinatura-preview{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}.ct-assinatura-preview img{max-width:220px;max-height:70px;object-fit:contain;border:1px solid var(--ct-borda);padding:4px;background:#fff}
 @media (max-width:960px){.ct{padding:14px}.ct-grade{grid-template-columns:1fr}}
 `;

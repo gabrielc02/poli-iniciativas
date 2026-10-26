@@ -19,12 +19,15 @@ export type Gremio = {
   assin1Nome: string;
   assin1Cargo: string;
   assin1Cpf: string;
+  assin1Imagem: string;
   assin2Nome: string;
   assin2Cargo: string;
   assin2Cpf: string;
+  assin2Imagem: string;
   assin3Nome: string;
   assin3Cargo: string;
   assin3Cpf: string;
+  assin3Imagem: string;
   dadosBancarios: string;
   formaPagamento: string;
   prazoPagamento: string;
@@ -47,12 +50,15 @@ export function gremioPadrao(): Gremio {
     assin1Nome: "",
     assin1Cargo: "",
     assin1Cpf: "",
+    assin1Imagem: "",
     assin2Nome: "",
     assin2Cargo: "",
     assin2Cpf: "",
+    assin2Imagem: "",
     assin3Nome: "",
     assin3Cargo: "",
     assin3Cpf: "",
+    assin3Imagem: "",
     dadosBancarios: "",
     formaPagamento: "transferência bancária",
     prazoPagamento: "",
@@ -527,12 +533,15 @@ const ROTULOS: Record<string, string> = {
   gremio_assin1_nome: "nome de quem assina pelo Grêmio",
   gremio_assin1_cargo: "cargo",
   gremio_assin1_cpf: "CPF",
+  gremio_assin1_imagem: "assinatura do primeiro signatário",
   gremio_assin2_nome: "nome de quem assina pelo Grêmio",
   gremio_assin2_cargo: "cargo",
   gremio_assin2_cpf: "CPF",
+  gremio_assin2_imagem: "assinatura do segundo signatário",
   gremio_assin3_nome: "nome de quem assina pelo Grêmio",
   gremio_assin3_cargo: "cargo",
   gremio_assin3_cpf: "CPF",
+  gremio_assin3_imagem: "assinatura do terceiro signatário",
   rep_empresa2_nome: "segundo representante da empresa",
   rep_empresa2_cargo: "cargo do segundo representante",
   rep_empresa3_nome: "terceiro representante da empresa",
@@ -586,12 +595,15 @@ export function variaveis(
     gremio_assin1_nome: g.assin1Nome,
     gremio_assin1_cargo: g.assin1Cargo,
     gremio_assin1_cpf: g.assin1Cpf,
+    gremio_assin1_imagem: g.assin1Imagem,
     gremio_assin2_nome: g.assin2Nome,
     gremio_assin2_cargo: g.assin2Cargo,
     gremio_assin2_cpf: g.assin2Cpf,
+    gremio_assin2_imagem: g.assin2Imagem,
     gremio_assin3_nome: g.assin3Nome,
     gremio_assin3_cargo: g.assin3Cargo,
     gremio_assin3_cpf: g.assin3Cpf,
+    gremio_assin3_imagem: g.assin3Imagem,
     rep_empresa2_nome: "",
     rep_empresa2_cargo: "",
     rep_empresa3_nome: "",
@@ -635,7 +647,9 @@ export function contratoHTML(proposta: Proposta, vars: Vars, modo: Modo = "empre
     const patrocinadora = titulo === "PATROCINADORA";
     const campoNome = patrocinadora ? LINHA.slice(0, 28) : f(nome);
     const campoCargo = patrocinadora ? LINHA.slice(0, 28) : f(cargo);
-    return `<td><div class="linha"></div><strong>${titulo}</strong><br/>Nome: ${campoNome}<br/>Cargo: ${campoCargo}<br/>CPF: ${cpf ? f(cpf) : LINHA.slice(0, 18)}</td>`;
+    const imagem = patrocinadora ? "" : vars[nome.replace(/[{}]/g, "").replace("gremio_assin", "gremio_assin").replace("_nome", "_imagem")] || "";
+    const imagemHtml = imagem.startsWith("data:image/") ? `<div class="assin-imagem"><img src="${imagem}" alt="Assinatura" /></div>` : "";
+    return `<td>${imagemHtml}<div class="linha"></div><strong>${titulo}</strong><br/>Nome: ${campoNome}<br/>Cargo: ${campoCargo}<br/>CPF: ${cpf ? f(cpf) : LINHA.slice(0, 18)}</td>`;
   };
   const qtdGremio = Math.min(3, Math.max(1, Number(vars.qtd_assinaturas_gremio || 2)));
   const qtdPatrocinador = Math.min(3, Math.max(1, Number(vars.qtd_assinaturas_patrocinador || 1)));
@@ -676,7 +690,7 @@ export const CSS_CONTRATO = `
 .contrato .campo{background:#dbe7fb;color:#13376e;padding:0 3px;border-radius:2px;font-family:Arial,sans-serif;font-size:10pt}
 .contrato table.assin{width:100%;margin-top:28pt;border-collapse:collapse}
 .contrato table.assin{table-layout:fixed}.contrato table.assin td{vertical-align:top;padding:0 8pt 18pt;font-size:11pt;text-align:left}.contrato table.assin.assin-gremio{margin-top:28pt}.contrato table.assin.assin-gremio td{text-align:center}.contrato table.assin.assin-patrocinador{margin-top:0}.contrato table.assin.assin-patrocinador td{text-align:center}
-.contrato .linha{border-top:1px solid #000;margin:34pt 0 4pt}
+.contrato .linha{border-top:1px solid #000;margin:8pt 0 4pt}.contrato .assin-imagem{height:30pt;display:flex;align-items:flex-end;justify-content:center;margin-bottom:2pt}.contrato .assin-imagem img{max-width:150pt;max-height:28pt;object-fit:contain}
 `;
 
 export function documentoWord(corpo: string, titulo: string): string {
